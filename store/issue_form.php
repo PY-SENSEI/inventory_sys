@@ -35,20 +35,20 @@ if (count($items) == 0) {
     exit();
 }
 
-$request = $items[0]; 
+$request = $items[0];
 ?>
 
 <div class="form-container">
     <h2>Issue Items - Request #<?php echo $request_id; ?></h2>
-    
+
     <div style="background: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
         <p><strong>Requester:</strong> <?php echo htmlspecialchars($request['requester_name']); ?></p>
         <p><strong>Request Date:</strong> <?php echo formatDate($request['request_date']); ?></p>
     </div>
-    
+
     <form action="process_issue.php" method="POST" id="issueForm">
         <input type="hidden" name="request_id" value="<?php echo $request_id; ?>">
-        
+
         <table style="width: 100%; margin-bottom: 20px;">
             <thead>
                 <tr>
@@ -71,119 +71,133 @@ $request = $items[0];
                                 <br><small style="color: #e74c3c;">Insufficient stock!</small>
                             <?php endif; ?>
                         </td>
+                        
                         <td>
                             <input type="hidden" name="detail_ids[]" value="<?php echo $item['detail_id']; ?>">
-                            <input type="hidden" name="requested_qty_<?php echo $item['detail_id']; ?>" value="<?php echo $item['qty_requested']; ?>">
-                            <input type="hidden" name="available_stock_<?php echo $item['detail_id']; ?>" value="<?php echo $item['current_stock']; ?>">
-                            <input type="number" 
-                                   name="issue_qty_<?php echo $item['detail_id']; ?>" 
-                                   class="form-control issue-qty" 
-                                   data-detail-id="<?php echo $item['detail_id']; ?>"
-                                   data-requested="<?php echo $item['qty_requested']; ?>"
-                                   data-available="<?php echo $item['current_stock']; ?>"
-                                   min="0" 
-                                   max="<?php echo min($item['qty_requested'], $item['current_stock']); ?>" 
-                                   value="0"
-                                   style="width: 100px;"
-                                   onchange="validateIssueQty(this)">
+                            <input type="hidden" name="requested_qty_<?php echo $item['detail_id']; ?>"
+                                value="<?php echo $item['qty_requested']; ?>">
+                            <input type="hidden" name="available_stock_<?php echo $item['detail_id']; ?>"
+                                value="<?php echo $item['current_stock']; ?>">
+                            <input type="hidden" name="already_issued_<?php echo $item['detail_id']; ?>"
+                                value="<?php echo $item['qty_issued']; ?>">
+                            <input type="number" name="issue_qty_<?php echo $item['detail_id']; ?>"
+                                class="form-control issue-qty" data-detail-id="<?php echo $item['detail_id']; ?>"
+                                data-requested="<?php echo $item['qty_requested']; ?>"
+                                data-available="<?php echo $item['current_stock']; ?>"
+                                data-issued="<?php echo $item['qty_issued']; ?>" min="0"
+                                max="<?php echo min($item['qty_requested'] - $item['qty_issued'], $item['current_stock']); ?>"
+                                value="0" style="width: 100px;" onchange="validateIssueQty(this)">
+                            <small>Already issued:
+                                <?php echo $item['qty_issued']; ?>/<?php echo $item['qty_requested']; ?></small>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
-        
+
         <div style="margin-top: 20px;">
-            <button type="submit" name="action" value="partial" class="btn btn-primary" onclick="return validateAllQtys()">Issue</button>
-            <button type="submit" name="action" value="full" class="btn btn-success" onclick="return validateFullIssue()">Issue All</button>
+            <button type="submit" name="action" value="partial" class="btn btn-primary"
+                onclick="return validateAllQtys()">Issue</button>
+            <button type="submit" name="action" value="full" class="btn btn-success"
+                onclick="return validateFullIssue()">Issue All</button>
             <a href="pending_requests.php" class="btn" style="background: #95a5a6; color: white;">Cancel</a>
         </div>
     </form>
 </div>
 
 <script>
-// buggy:-
-function validateIssueQty(input) {
-    const detailId = input.getAttribute('data-detail-id');
-    const requested = parseInt(input.getAttribute('data-requested'));
-    const available = parseInt(input.getAttribute('data-available'));
-    const value = parseInt(input.value) || 0;
-    
-    if (value > requested) {
-        alert('Cannot issue more than requested quantity (' + requested + ')');
-        input.value = requested;
-        return false;
-    }
-    
-    if (value > available) {
-        alert('Insufficient stock! Available: ' + available);
-        input.value = available;
-        return false;
-    }
-    
-    if (value < 0) {
-        input.value = 0;
-        return false;
-    }
-    
-    return true;
-}
-
-function validateAllQtys() {
-    const inputs = document.querySelectorAll('.issue-qty');
-    let hasValidIssue = false;
-    
-    for (let input of inputs) {
-        const value = parseInt(input.value) || 0;
-        if (value > 0) {
-            hasValidIssue = true;
-            break;
-        }
-    }
-
-    if (!hasValidIssue) {
-        alert('Please enter at least one item quantity to issue');
-        return false;
-    }
-    return true;
-}
-
-// buggy :-
-function validateFullIssue() {
-    const inputs = document.querySelectorAll('.issue-qty');
-    let canIssueFull = true;
-    
-    for (let input of inputs) {
+    // buggy:-
+    function validateIssueQty(input) {
+        const detailId = input.getAttribute('data-detail-id');
         const requested = parseInt(input.getAttribute('data-requested'));
         const available = parseInt(input.getAttribute('data-available'));
-        
-        if (requested > available) {
-            alert('Cannot issue full request due to insufficient stock for some items');
+        const alreadyIssued = parseInt(input.getAttribute('data-issued') || '0');
+        const value = parseInt(input.value) || 0;
+
+        const remainingToIssue = requested - alreadyIssued;
+
+        if (value > remainingToIssue) {
+            alert(`Cannot issue more than remaining requested quantity. Already issued: ${alreadyIssued}, Remaining: ${remainingToIssue}`);
+            input.value = remainingToIssue;
             return false;
         }
+        if (value > available) {
+            alert(`Insufficient stock! Available: ${available}`);
+            input.value = Math.min(remainingToIssue, available);
+            return false;
+        }  
+        if (value < 0) {
+            input.value = 0;
+            return false;
+        }
+        return true;
     }
-    
-    for (let input of inputs) {
-        const requested = parseInt(input.getAttribute('data-requested'));
-        input.value = requested;
-    }
-    
-    return true;
-}
 
-document.getElementById('issueForm').addEventListener('submit', function(e) {
-    const action = e.submitter.value;
-    let message = '';
-    
-    if (action === 'partial') {
-        message = 'Are you sure you want to issue these items? Stock will be reduced accordingly.';
-    } else {
-        message = 'Are you sure you want to issue all requested items? Stock will be reduced accordingly.';
+    function loadAlreadyIssued() {
+
+        <?php foreach ($items as $item): ?>
+            document.querySelector('[data-detail-id="<?php echo $item['detail_id']; ?>"]')
+                .setAttribute('data-issued', '<?php echo $item['qty_issued']; ?>');
+        <?php endforeach; ?>
     }
-    
-    if (!confirm(message)) {
-        e.preventDefault();
+    function validateAllQtys() {
+        const inputs = document.querySelectorAll('.issue-qty');
+        let hasValidIssue = false;
+
+        for (let input of inputs) {
+            const value = parseInt(input.value) || 0;
+            if (value > 0) {
+                hasValidIssue = true;
+                break;
+            }
+        }
+
+        if (!hasValidIssue) {
+            alert('Please enter at least one item quantity to issue');
+            return false;
+        }
+        return true;
     }
-});
+    function validateFullIssue() {
+        const inputs = document.querySelectorAll('.issue-qty');
+        let canIssueFull = true;
+
+        for (let input of inputs) {
+            const requested = parseInt(input.getAttribute('data-requested'));
+            const available = parseInt(input.getAttribute('data-available'));
+
+            if (requested > available) {
+                alert('Cannot issue full request due to insufficient stock for some items');
+                return false;
+            }
+        }
+
+        for (let input of inputs) {
+            const requested = parseInt(input.getAttribute('data-requested'));
+            input.value = requested;
+        }
+
+        return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        loadAlreadyIssued();
+    });
+
+    document.getElementById('issueForm').addEventListener('submit', function (e) {
+        const action = e.submitter.value;
+        let message = '';
+
+        if (action === 'partial') {
+            message = 'Are you sure you want to issue these items?';
+        } else {
+            message = 'Are you sure you want to issue all requested items?';
+        }
+
+        if (!confirm(message)) {
+            e.preventDefault();
+        }
+    });
 
 </script>
 
