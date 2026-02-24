@@ -18,7 +18,7 @@ try {
     $return_summary = [];
     $updated_requests = [];
     
-    // Process each return
+    // each id returns
     for ($i = 0; $i < count($detail_ids); $i++) {
         $detail_id = $detail_ids[$i];
         $item_id = $item_ids[$i];
@@ -28,7 +28,7 @@ try {
         if ($return_qty > 0) {
             $any_returned = true;
             
-            // Get current details from database (not from POST)
+            //get the data from db and not coming from POST req.
             $stmt = $pdo->prepare("
                 SELECT 
                     ird.qty_issued, 
@@ -51,22 +51,18 @@ try {
             $item_name = $current['item_name'];
             $current_stock = $current['current_stock'];
             
-            // Calculate pending return
             $pending_return = $qty_issued - $qty_returned;
             
-            // VALIDATION 1: Cannot return more than pending
             if ($return_qty > $pending_return) {
                 throw new Exception(
                     "Cannot return $return_qty of $item_name. Only $pending_return units pending return."
                 );
             }
             
-            // VALIDATION 2: Cannot return negative
             if ($return_qty < 0) {
                 throw new Exception("Return quantity cannot be negative");
             }
             
-            // VALIDATION 3: New total returned cannot exceed issued
             $new_total_returned = $qty_returned + $return_qty;
             if ($new_total_returned > $qty_issued) {
                 throw new Exception(
@@ -74,7 +70,6 @@ try {
                 );
             }
             
-            // Update return quantity in request details
             $stmt = $pdo->prepare("
                 UPDATE issue_request_details 
                 SET qty_returned = qty_returned + ? 
@@ -82,7 +77,7 @@ try {
             ");
             $stmt->execute([$return_qty, $detail_id]);
             
-            // CRITICAL: Add stock back to items
+            
             $stmt = $pdo->prepare("
                 UPDATE items 
                 SET current_stock = current_stock + ? 
@@ -90,7 +85,7 @@ try {
             ");
             $stmt->execute([$return_qty, $item_id]);
             
-            // Track for summary and request status update
+           
             $return_summary[] = [
                 'item_name' => $item_name,
                 'qty' => $return_qty
@@ -101,9 +96,9 @@ try {
     }
     
     if ($any_returned) {
-        // Update status for all affected requests
+      
         foreach (array_keys($updated_requests) as $req_id) {
-            // Check if all items in this request are fully returned
+            
             $stmt = $pdo->prepare("
                 SELECT 
                     SUM(qty_issued) as total_issued,
@@ -115,7 +110,7 @@ try {
             $result = $stmt->fetch();
             
             if ($result['total_issued'] == $result['total_returned']) {
-                // All items fully returned
+               
                 $new_status = 'returned';
             } else {
                 // Partially returned
@@ -126,7 +121,7 @@ try {
             $stmt->execute([$new_status, $req_id]);
         }
         
-        // Commit transaction
+       
         $pdo->commit();
         
         // Create success message with summary
@@ -136,8 +131,6 @@ try {
         }
         
         $_SESSION['success'] = nl2br($summary_text);
-        
-        // Log the transaction for audit (optional)
         error_log("RETURN PROCESSED: " . date('Y-m-d H:i:s') . " - " . json_encode($return_summary));
         
     } else {
@@ -149,7 +142,7 @@ try {
     $pdo->rollBack();
     $_SESSION['error'] = "Failed to process returns: " . $e->getMessage();
     
-    // Log error for debugging
+   
     error_log("RETURN ERROR: " . $e->getMessage());
 }
 

@@ -11,7 +11,6 @@ if (!isset($_GET['request_id']) || empty($_GET['request_id'])) {
 }
 
 $request_id = $_GET['request_id'];
-
 $stmt = $pdo->prepare("
     SELECT ir.*, 
            ird.id as detail_id,
@@ -106,7 +105,7 @@ $request = $items[0];
 </div>
 
 <script>
-    // buggy:-
+
     function validateIssueQty(input) {
         const detailId = input.getAttribute('data-detail-id');
         const requested = parseInt(input.getAttribute('data-requested'));
@@ -198,9 +197,7 @@ $request = $items[0];
             e.preventDefault();
         }
     });
-
 </script>
-
 <?php
 include '../includes/footer.php';
 ?>

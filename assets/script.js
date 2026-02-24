@@ -1,8 +1,6 @@
 function confirmDelete(message) {
     return confirm(message || 'Are you sure you want to delete this item?');
 }
-
-
 function validateForm(formId) {
     const form = document.getElementById(formId);
     const inputs = form.querySelectorAll('input[required], select[required]');
@@ -36,8 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
     })
 })
 
-
-
 function validateRequestForm() {
     const requesterName = document.getElementById('requester_name');
     if (requesterName && !requesterName.value.trim()) {
@@ -48,11 +44,9 @@ function validateRequestForm() {
     return true;
 }
 
-
 function formatNumber(num) {
     return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
 }
-
 
 function filterTable(inputId, tableId) {
     const input = document.getElementById(inputId);
@@ -74,11 +68,9 @@ function filterTable(inputId, tableId) {
                 }
             }
         }
-        
         rows[i].style.display = found ? '' : 'none';
     }
 }
-
 
 function exportTableToCSV(tableId, filename) {
     const table = document.getElementById(tableId);
@@ -104,6 +96,5 @@ function exportTableToCSV(tableId, filename) {
     a.href = url;
     a.download = filename || 'export.csv';
     a.click();
-    
     window.URL.revokeObjectURL(url);
 }

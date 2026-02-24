@@ -135,7 +135,7 @@ foreach ($issued_items as $item) {
                 </div>
             </div>
             
-            <!-- Action Buttons -->
+          
             <div style="display: flex; gap: 10px; justify-content: flex-end;">
                 <button type="button" class="btn" onclick="selectAllMax()" style="background: #f39c12; color: white;">
                     Return All Max
@@ -160,7 +160,7 @@ foreach ($issued_items as $item) {
 </div>
 
 <script>
-// Track selected returns
+
 let selectedReturns = {};
 
 function validateReturnQty(input) {
@@ -169,7 +169,7 @@ function validateReturnQty(input) {
     const itemName = input.getAttribute('data-item');
     const value = parseInt(input.value) || 0;
     
-    // Cannot exceed pending return quantity
+    
     if (value > pending) {
         alert(`Cannot return more than pending quantity (${pending}) for ${itemName}`);
         input.value = pending;
@@ -285,11 +285,11 @@ function validateReturnForm() {
     return confirm(confirmMessage);
 }
 
-// Initialize summary on page load
+// Initialize summary on page load 
 document.addEventListener('DOMContentLoaded', function() {
     updateReturnSummary();
     
-    // Add tooltips
+    
     const inputs = document.querySelectorAll('.return-qty');
     inputs.forEach(input => {
         const pending = input.getAttribute('data-pending');
