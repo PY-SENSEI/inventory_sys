@@ -6,7 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $unit = $_POST['unit'];
     $current_stock = (int)$_POST['current_stock'];
     
-    // Validation
+
     $errors = [];
     
     if (empty($item_name)) {
@@ -21,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $errors[] = "Stock cannot be negative";
     }
     
-    // Check for duplicate item name
     $stmt = $pdo->prepare("SELECT id FROM items WHERE item_name = ?");
     $stmt->execute([$item_name]);
     if ($stmt->fetch()) {

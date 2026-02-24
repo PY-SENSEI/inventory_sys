@@ -4,11 +4,17 @@ require_once '../config/functions.php';
 include '../includes/header.php';
 include '../includes/sidebar.php';
 
-// Get all items
 $stmt = $pdo->query("SELECT * FROM items ORDER BY item_name");
 $items = $stmt->fetchAll();
 ?>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
 <div class="table-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h2>Items List</h2>
@@ -49,7 +55,7 @@ $items = $stmt->fetchAll();
                                 </a>
                             <?php else: ?>
                                 <button class="btn" style="padding: 5px 10px; font-size: 12px; background: #95a5a6; color: white;" disabled title="Cannot delete - item is used in requests">In Use</button>
-                            <?php endif; ?>
+                             <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -61,6 +67,8 @@ $items = $stmt->fetchAll();
         </tbody>
     </table>
 </div>
+</body>
+</html>
 
 <?php
 include '../includes/footer.php';

@@ -42,10 +42,11 @@ include '../includes/sidebar.php';
 </div>
 
 <script>
+
 document.getElementById('addItemForm').onsubmit = function() {
     const itemName = document.getElementById('item_name').value.trim();
     const unit = document.getElementById('unit').value;
-    const stock = parseInt(document.getElementById('current_stock').value);
+    const stock = document.getElementById('current_stock').value;
     
     if (itemName.length < 2) {
         alert('Item name must be at least 2 characters long');
