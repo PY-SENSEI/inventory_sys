@@ -173,9 +173,7 @@ foreach ($items as $item) {
     <button onclick="printReport()" style="background: #95a5a6; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
         🖨️ Print Report
     </button>
-    <button onclick="exportSimpleCSV()" style="background: #27ae60; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-        📥 Download as CSV
-    </button>
+
 </div>
 
 <!-- Simple JavaScript for Search -->
@@ -200,35 +198,6 @@ function printReport() {
     window.print();
 }
 
-// Simple CSV export
-function exportSimpleCSV() {
-    // Get all rows
-    let rows = document.querySelectorAll('#itemTableBody tr');
-    let csv = 'Item Name,Unit,Current Stock,Status,Issued,Returned,Net Used\n';
-    
-    for (let row of rows) {
-        let cols = row.querySelectorAll('td');
-        if (cols.length > 0) {
-            let itemName = cols[0].textContent.trim();
-            let unit = cols[1].textContent.trim();
-            let stock = cols[2].textContent.trim();
-            let status = cols[3].textContent.trim();
-            let issued = cols[4].textContent.trim();
-            let returned = cols[5].textContent.trim();
-            let netUsed = cols[6].textContent.trim();
-            
-            csv += `"${itemName}",${unit},${stock},"${status}",${issued},${returned},${netUsed}\n`;
-        }
-    }
-    
-    // Download
-    let blob = new Blob([csv], { type: 'text/csv' });
-    let url = window.URL.createObjectURL(blob);
-    let a = document.createElement('a');
-    a.href = url;
-    a.download = 'stock-report.csv';
-    a.click();
-}
 
 // Simple explanation popup
 function showHelp() {

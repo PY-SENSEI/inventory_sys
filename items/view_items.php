@@ -50,7 +50,7 @@ $items = $stmt->fetchAll();
                                 <a href="delete_item.php?id=<?php echo $item['id']; ?>" 
                                    class="btn btn-danger" 
                                    style="padding: 5px 10px; font-size: 12px;"
-                                   onclick="return confirmDelete('Are you sure you want to delete this item? This action cannot be undone.');">
+                                   onclick="return confirmDelete('Are you sure you want to delete this item?');">
                                     Delete
                                 </a>
                             <?php else: ?>
