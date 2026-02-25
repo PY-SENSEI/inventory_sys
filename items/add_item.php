@@ -1,9 +1,19 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+?>
+
+<?php
 require_once '../config/db.php';
 require_once '../config/functions.php';
 include '../includes/header.php';
 include '../includes/sidebar.php';
 ?>
+
+
 
 <div class="form-container">
     <h2>Add New Item</h2>

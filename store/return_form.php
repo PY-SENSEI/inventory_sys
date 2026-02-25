@@ -1,10 +1,17 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+?>
+
+<?php
 require_once '../config/db.php';
 require_once '../config/functions.php';
 include '../includes/header.php';
 include '../includes/sidebar.php';
 
-// Get all issued items that haven't been fully returned
 $stmt = $pdo->query("
     SELECT 
         ir.id as request_id,
@@ -44,6 +51,9 @@ foreach ($issued_items as $item) {
     $grouped_items[$request_id]['items'][] = $item;
 }
 ?>
+
+
+
 
 <div class="form-container" style="max-width: 1200px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">

@@ -1,4 +1,12 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+?>
+
+<?php
 require_once '../config/db.php';
 require_once '../config/functions.php';
 include '../includes/header.php';
@@ -7,6 +15,8 @@ include '../includes/sidebar.php';
 $stmt = $pdo->query("SELECT * FROM items ORDER BY item_name");
 $items = $stmt->fetchAll();
 ?>
+
+
 
 <div class="form-container" style="max-width: 900px;">
     <h2>Create New Request</h2>

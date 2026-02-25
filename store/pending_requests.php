@@ -1,4 +1,12 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+?>
+
+<?php
 require_once '../config/db.php';
 require_once '../config/functions.php';
 
@@ -7,7 +15,6 @@ require_once '../config/functions.php';
 include '../includes/header.php';
 include '../includes/sidebar.php';
 
-// Get all pending requests
 
 $stmt = $pdo->query("
     SELECT ir.*, 
@@ -22,6 +29,7 @@ $stmt = $pdo->query("
 
 $pending_requests = $stmt->fetchAll();
 ?>
+
 
 <div class="table-container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">

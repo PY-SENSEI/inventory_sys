@@ -1,3 +1,12 @@
+
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../login.php");
+    exit();
+}
+?>
+
 <?php
 require_once '../config/db.php';
 require_once '../config/functions.php';
@@ -36,6 +45,7 @@ foreach ($items as $item) {
     }
 }
 ?>
+
 
 <!-- Simple Header -->
 <div style="margin-bottom: 20px;">
